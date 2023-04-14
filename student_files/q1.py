@@ -4,7 +4,7 @@ from pyspark.sql import SparkSession
 
 
 # don't change this line
-hdfs_nn = "172.31.93.67"
+hdfs_nn = "172.31.88.194"
 
 spark = SparkSession.builder.appName("Assigment 2 Question 1").getOrCreate()
 # YOUR CODE GOES BELOW
