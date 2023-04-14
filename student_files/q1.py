@@ -16,7 +16,8 @@ spark = SparkSession.builder.appName("Assigment 2 Question 1").getOrCreate()
 df = spark.read.option("header",True).csv(f"hdfs://{hdfs_nn}:9000/assignment2/part1/input/")
 df.printSchema()
 
-df_filtered = df.filter((df.Rating > 1.0 and df.Reviews))
+
+df_filtered = df.filter((df.Rating > 1.0) & (df.Reviews.isNotNull()))
 
 df_filtered.write.csv(f"hdfs://{hdfs_nn}:9000/assignment2/part1/output/")
 # Print the filtered rows
