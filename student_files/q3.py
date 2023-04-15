@@ -15,13 +15,13 @@ df = spark.read.option("header", True).option("inferSchema", True).csv("hdfs://{
 
 df = df.select(fn.col('ID_TA'), fn.col('Reviews'))
 
-# Converts the "[['Just like home', 'A Warm Welcome to Wintry Amsterdam'], ['01/03/2018', '01/01/2018']]" to a List datatype 
-def Maketolist(intput_str):
+# Converts the "[['Just like home', 'A Warm Welcome to Wintry Amsterdam'], ['01/03/2018', '01/01/2018']]" to an Array
+def MaketoArray(intput_str):
     array = ast.literal_eval(input_str)
     return array
 # Using RDD to utilise map functionality 
 df = df.rdd
-df = df.map(lambda cols: ( cols[0],Maketolist(cols[1])[0], Maketolist(cols[1])[1] )) #[0] is ID_TA, The second one would be the list of reviews, the third one would be the list of dates 
+df = df.map(lambda cols: ( cols[0],MaketoArray(cols[1])[0], MaketoArray(cols[1])[1] )) #[0] is ID_TA, The second one would be the list of reviews, the third one would be the list of dates 
 
 df = df.toDF(["ID_TA", "review", "date"])
 
