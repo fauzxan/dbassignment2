@@ -23,10 +23,11 @@ def tolist(string_list):
 # Using rdd apis here
 df = df.rdd
 df = df.map(lambda cols: ( cols[0],tolist(cols[1])[0], tolist(cols[1])[1] )) #[0] is ID_TA, The second one would be the list of reviews, the third one would be the list of dates 
+# Using RDD to utilise map functionality 
 
 df = df.toDF(["ID_TA", "review", "date"])
 
-df = df.withColumn('tmp', fn.arrays_zip("review", "date")).withColumn('tmp', fn.explode('tmp')).select("ID_TA" , fn.col("tmp.review"), fn.col("tmp.date"))
+df = df.withColumn('tmp', fn.arrays_zip("review", "date")).withColumn('tmp', fn.explode('tmp')).select("ID_TA" , fn.col("tmp.review"), fn.col("tmp.date")) # review and  date columns are represented as lists of strings (zip) following which each review and its corresponding date are represented as separate rows (explode).
 
 # Sanity Check
 df.show()
