@@ -30,5 +30,5 @@ df = df.withColumn('new', fn.arrays_zip("review", "date")).withColumn('new', fn.
 # Sanity Check
 df.show()
 
-df.write.csv("hdfs://%s:9000/assignment2/output/question3/" % (hdfs_nn), header=True)
+df.write.csv("hdfs://%s:9000/assignment2/part1/output/question3/" % (hdfs_nn), header=True)
 

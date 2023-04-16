@@ -43,4 +43,4 @@ count_df.show(truncate=False)
 # count_df.write.option("header", "true").csv("output/q4/")
 
 # AWSAcademy
-count_df.write.csv("hdfs://%s:9000/assignment2/output/question4/" % (hdfs_nn), header=True)
+count_df.write.csv("hdfs://%s:9000/assignment2/part2/output/question4/" % (hdfs_nn), header=True)
