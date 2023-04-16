@@ -1,7 +1,9 @@
-import sys 
+import sys
 from pyspark.sql import SparkSession
+from pyspark.sql.types import ArrayType, StringType, StructField, StructType
+from pyspark.sql.functions import from_json, col, explode, array, array_sort, count
+
 # you may add more import if you need to
-from pyspark.sql.functions import  explode, count, col,  from_json, concat_ws, least, greatest
 
 
 # don't change this line
@@ -10,15 +12,8 @@ hdfs_nn = sys.argv[1]
 spark = SparkSession.builder.appName("Assigment 2 Question 5").getOrCreate()
 # YOUR CODE GOES BELOW
 
-# locally
-# df = (
-#     spark.read.option("header", True)
-#     .option("inferSchema", True)
-#     .option("delimiter", ",")
-#     .option("quotes", '"')
-#     .parquet("data/tmdb_5000_credits.parquet")    
-# )
-# AWSAcademy
+json_schema = ArrayType(StructType([StructField("name", StringType(), False)]))
+
 df = (
     spark.read.option("header", True)
     .option("inferSchema", True)
@@ -27,38 +22,45 @@ df = (
     .parquet("hdfs://%s:9000/assignment2/part2/input/" % (hdfs_nn))
 )
 
-json_parser = "array<struct<name:string>>"
-
-
-#hint 
 df = df.drop("crew")
+
 df = df.withColumn(
-    "actor1", explode(from_json(col("cast"), json_parser).getField("name"))
+    "actor1", explode(from_json(col("cast"), json_schema).getField("name"))
 )
 df = df.withColumn(
-    "actor2", explode(from_json(col("cast"), json_parser).getField("name"))
+    "actor2", explode(from_json(col("cast"), json_schema).getField("name"))
 )
-df=df.select("movie_id","title","actor1","actor2").filter(col("actor1") != col("actor2"))
 
+df = df.select("movie_id", "title", "actor1", "actor2")
 
-df = df.withColumn("helper", concat_ws(",", least("actor1", "actor2"), greatest("actor1", "actor2")))
-new_df = df.dropDuplicates(["movie_id", "title", "helper"]).sort(col("helper").asc())
+# An actor/actress cannot co-cast with themselves... (philosophical identity question that's best not answered here hahaha!)
+df = df.filter(col("actor1") != col("actor2"))
 
-df_counter = (
-    new_df.groupBy("helper")
+# Sort the cast pairing arrays to make it easier to compare and count (pure string comparisons are generally cheaper than array-of-strings comparisons)
+# This is super hacky and scuffed, but it works and it doesn't require any more memory than the default Hadoop and Spark settings!
+df = df.withColumn("cast_pair", array(col("actor1"), col("actor2"))).withColumn(
+    "cast_pair", array_sort(col("cast_pair")).cast("string")
+)
+
+# Remove duplicate cast pair repetitions within the same movies to avoid overcounting
+df = df.dropDuplicates(["movie_id", "title", "cast_pair"]).sort(col("cast_pair").asc())
+
+df_counts = (
+    df.groupBy("cast_pair")
     .agg(count("*").alias("count"))
-    .filter(col("count") > 1)
+    .filter(col("count") >= 2)
+    .sort(col("cast_pair").asc())
 )
 
 final_df = (
-    df_counter.join(new_df, ["helper"], "inner")
-    .drop("helper", "count")
-    .sort(col("actor1").asc())
+    df_counts.join(df, ["cast_pair"], "inner")
+    .drop("cast_pair", "count")
+    .sort(col("movie_id").asc())
 )
+
+# Sanity check
 final_df.show()
 
-# locally
-# new_df.write.option("header", "true").csv("output/q5/")
-
-# AWSAcademy
-new_df.write.csv(f"hdfs://{hdfs_nn}:9000/assignment2/part2/output/question5/")
+final_df.write.option("header", True).mode("overwrite").parquet(
+    "hdfs://%s:9000/assignment2/output/question5/" % (hdfs_nn)
+)
