@@ -5,14 +5,18 @@ from pyspark.sql import SparkSession
 
 # don't change this line
 try:
-    hdfs_nn = sys.argv[1]
+    hdfs_nn = sys.argv[1].strip()
     print("\n\n\n\nSuccessfully retrieved system argument: ", hdfs_nn)
 except Exception as e: 
     print(f"Error: {e}")
     print("<Usage>: spark-submit spark://<master>:7077 q1.py <hdfs_namenode>")
     sys.exit(1)
-
-spark = SparkSession.builder.appName("Assigment 2 Question 1").getOrCreate()
+try:
+    spark = SparkSession.builder.\
+        config("spark.executor.memory", "512m").\
+        appName("Assigment 2 Question 1").getOrCreate()
+except Exception as e:
+    print(f"\n\nError while trying to create session: {e}")
 # YOUR CODE GOES BELOW
 df = spark.read.option("header",True).csv(f"hdfs://{hdfs_nn}:9000/assignment2/part1/input/")
 df.printSchema()
