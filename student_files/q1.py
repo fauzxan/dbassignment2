@@ -21,7 +21,7 @@ df = spark.read.option("header",True).csv(f"hdfs://{hdfs_nn}:9000/assignment2/pa
 df.printSchema()
 
 
-df_filtered = df.filter(df.Reviews.isNotNull()).filter(df.Rating.isNotNull & df.Rating > 1.0)
+df_filtered = df.filter(df.Reviews.isNotNull()).filter(df.Rating.isNotNull() & df.Rating > 1.0)
 df_filtered.printSchema()
 
 df_filtered.write.csv(f"hdfs://{hdfs_nn}:9000/assignment2/part1/output/", header=True)
