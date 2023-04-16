@@ -62,5 +62,5 @@ combined_df = (
 
 combined_df.show()
 combined_df.write.csv(
-    "hdfs://%s:9000/assignment2/output/question2/" % (hdfs_nn), header=True
+    "hdfs://%s:9000/assignment2/part1/output/question2/" % (hdfs_nn), header=True
 )
