@@ -61,6 +61,6 @@ final_df = (
 # Sanity check
 final_df.show()
 
-final_df.write.option("header", True).mode("overwrite").parquet(
-    "hdfs://%s:9000/assignment2/output/question5/" % (hdfs_nn)
+final_df.write.option("header", True).parquet(
+    "hdfs://%s:9000/assignment2/part2/output/question5/" % (hdfs_nn)
 )
