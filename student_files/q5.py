@@ -1,9 +1,7 @@
-import sys
+import sys 
 from pyspark.sql import SparkSession
-from pyspark.sql.types import ArrayType, StringType, StructField, StructType
-from pyspark.sql.functions import from_json, col, explode, array, array_sort, count
-
 # you may add more import if you need to
+from pyspark.sql.functions import  explode, count, col,  from_json, concat_ws, least, greatest
 
 
 # don't change this line
@@ -11,9 +9,6 @@ hdfs_nn = sys.argv[1]
 
 spark = SparkSession.builder.appName("Assigment 2 Question 5").getOrCreate()
 # YOUR CODE GOES BELOW
-
-json_schema = ArrayType(StructType([StructField("name", StringType(), False)]))
-
 df = (
     spark.read.option("header", True)
     .option("inferSchema", True)
@@ -22,45 +17,38 @@ df = (
     .parquet("hdfs://%s:9000/assignment2/part2/input/" % (hdfs_nn))
 )
 
+json_parser = "array<struct<name:string>>"
+
+
+#hint 
 df = df.drop("crew")
-
 df = df.withColumn(
-    "actor1", explode(from_json(col("cast"), json_schema).getField("name"))
+    "actor1", explode(from_json(col("cast"), json_parser).getField("name"))
 )
 df = df.withColumn(
-    "actor2", explode(from_json(col("cast"), json_schema).getField("name"))
+    "actor2", explode(from_json(col("cast"), json_parser).getField("name"))
 )
+df=df.select("movie_id","title","actor1","actor2").filter(col("actor1") != col("actor2"))
 
-df = df.select("movie_id", "title", "actor1", "actor2")
 
-# An actor/actress cannot co-cast with themselves... (philosophical identity question that's best not answered here hahaha!)
-df = df.filter(col("actor1") != col("actor2"))
+df = df.withColumn("helper", concat_ws(",", least("actor1", "actor2"), greatest("actor1", "actor2")))
+new_df = df.dropDuplicates(["movie_id", "title", "helper"]).sort(col("helper").asc())
 
-# Sort the cast pairing arrays to make it easier to compare and count (pure string comparisons are generally cheaper than array-of-strings comparisons)
-# This is super hacky and scuffed, but it works and it doesn't require any more memory than the default Hadoop and Spark settings!
-df = df.withColumn("cast_pair", array(col("actor1"), col("actor2"))).withColumn(
-    "cast_pair", array_sort(col("cast_pair")).cast("string")
-)
-
-# Remove duplicate cast pair repetitions within the same movies to avoid overcounting
-df = df.dropDuplicates(["movie_id", "title", "cast_pair"]).sort(col("cast_pair").asc())
-
-df_counts = (
-    df.groupBy("cast_pair")
+df_counter = (
+    new_df.groupBy("helper")
     .agg(count("*").alias("count"))
-    .filter(col("count") >= 2)
-    .sort(col("cast_pair").asc())
+    .filter(col("count") > 1)
 )
 
 final_df = (
-    df_counts.join(df, ["cast_pair"], "inner")
-    .drop("cast_pair", "count")
-    .sort(col("movie_id").asc())
+    df_counter.join(new_df, ["helper"], "inner")
+    .sort(col("helper").asc())
+    .drop("helper", "count")
+
 )
-
-# Sanity check
-# final_df.show()
-
-final_df.write.option("header", True).parquet(
-    "hdfs://%s:9000/assignment2/part2/output/question5/" % (hdfs_nn)
+final_df.show()
+rows = final_df.count()
+print("\nrows:", rows)
+final_df.write.option("header", True).mode("overwrite").parquet(
+    "hdfs://%s:9000/assignment2/output/question5/" % (hdfs_nn)
 )
