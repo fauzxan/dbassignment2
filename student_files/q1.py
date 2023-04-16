@@ -17,6 +17,7 @@ try:
         appName("Assigment 2 Question 1").getOrCreate()
 except Exception as e:
     print(f"\n\nError while trying to create session: {e}")
+    sys.exit(1)
 # YOUR CODE GOES BELOW
 df = spark.read.option("header",True).csv(f"hdfs://{hdfs_nn}:9000/assignment2/part1/input/")
 df.printSchema()
