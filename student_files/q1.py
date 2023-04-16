@@ -6,6 +6,7 @@ from pyspark.sql import SparkSession
 # don't change this line
 try:
     hdfs_nn = sys.argv[1]
+    print("\n\n\n\nSuccessfully retrieved system argument: ", hdfs_nn)
 except Exception as e: 
     print(f"Error: {e}")
     print("<Usage>: spark-submit spark://<master>:7077 q1.py <hdfs_namenode>")
