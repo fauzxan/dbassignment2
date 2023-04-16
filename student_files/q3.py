@@ -54,4 +54,4 @@ final_df = final_df.withColumn("review", trim(final_df.review)).withColumn(
 final_df.show()
 rows = df.count()
 
-final_df.write.csv("hdfs://%s:9000/assignment2/output/question3/" % (hdfs_nn), header=True)
+final_df.write.csv("hdfs://%s:9000/assignment2/part1/output/question3/" % (hdfs_nn), header=True)

@@ -50,5 +50,5 @@ final_df.show()
 rows = final_df.count()
 print("\nrows:", rows)
 final_df.write.option("header", True).mode("overwrite").parquet(
-    "hdfs://%s:9000/assignment2/output/question5/" % (hdfs_nn)
+    "hdfs://%s:9000/assignment2/part2/output/question5/" % (hdfs_nn)
 )
