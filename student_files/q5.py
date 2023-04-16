@@ -19,7 +19,7 @@ spark = SparkSession.builder.appName("Assigment 2 Question 5").getOrCreate()
 #     .parquet("data/tmdb_5000_credits.parquet")    
 # )
 # AWSAcademy
-df = spark.read.option("header",True).csv(f"hdfs://{hdfs_nn}:9000/assignment2/part1/input/")
+df = spark.read.option("header",True).csv(f"hdfs://{hdfs_nn}:9000/assignment2/part2/input/")
 
 json_parser = "array<struct<name:string>>"
 
