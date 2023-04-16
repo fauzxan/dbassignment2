@@ -22,6 +22,7 @@ df.printSchema()
 
 
 df_filtered = df.filter((df.Rating > 1.0) & (df.Reviews.isNotNull()))
+df_filtered.printSchema()
 
 df_filtered.write.csv(f"hdfs://{hdfs_nn}:9000/assignment2/part1/output/", header=True)
 # Print the filtered rows
