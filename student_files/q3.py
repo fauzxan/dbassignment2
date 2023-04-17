@@ -7,9 +7,19 @@ import ast
 
 
 # don't change this line
-hdfs_nn = sys.argv[1]
+try:
+    hdfs_nn = sys.argv[1].strip()
+    print("\n\n\n\nSuccessfully retrieved system argument: ", hdfs_nn)
+except Exception as e: 
+    print(f"Error: {e}")
+    print("<Usage>: spark-submit spark://<master>:7077 q1.py <hdfs_namenode>")
+    sys.exit(1)
 
-spark = SparkSession.builder.appName("Assigment 2 Question 3").getOrCreate()
+try:
+    spark = SparkSession.builder.appName("Assigment 2 Question 1").getOrCreate()
+except Exception as e:
+    print(f"\n\nError while trying to create session: {e}")
+    sys.exit(1)
 # YOUR CODE GOES BELOW
 df = spark.read.option("header", True).option("inferSchema", True).csv("hdfs://{}:9000/assignment2/part1/input/".format(hdfs_nn))
 

@@ -8,9 +8,18 @@ from pyspark.sql.functions import min
 
 
 # don't change this line
-hdfs_nn = sys.argv[1]
-
-spark = SparkSession.builder.appName("Assigment 2 Question 2").getOrCreate()
+try:
+    hdfs_nn = sys.argv[1].strip()
+    print("\n\n\n\nSuccessfully retrieved system argument: ", hdfs_nn)
+except Exception as e: 
+    print(f"Error: {e}")
+    print("<Usage>: spark-submit spark://<master>:7077 q1.py <hdfs_namenode>")
+    sys.exit(1)
+try:
+    spark = SparkSession.builder.appName("Assigment 2 Question 1").getOrCreate()
+except Exception as e:
+    print(f"\n\nError while trying to create session: {e}")
+    sys.exit(1)
 # YOUR CODE GOES BELOW
 
 df = (
