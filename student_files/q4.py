@@ -14,7 +14,7 @@ except Exception as e:
     print("<Usage>: spark-submit spark://<master>:7077 q1.py <hdfs_namenode>")
     sys.exit(1)
 try:
-    spark = SparkSession.builder.appName("Assigment 2 Question 1").getOrCreate()
+    spark = SparkSession.builder.appName("Assigment 2 Question 4").getOrCreate()
 except Exception as e:
     print(f"\n\nError while trying to create session: {e}")
     sys.exit(1)
